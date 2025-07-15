@@ -1,6 +1,4 @@
 import serial
-import struct
-import time
 import numpy as np
 
 class IQReceiver:
