@@ -31,6 +31,7 @@ def main():
   
   # Read size of incoming IQ array
   arraySize = ser.read(4)
+  (arraySize,) = struct.unpack('<I', arraySize)
   
   # Read number of valid IQ Samples
   samplesNum = ser.read(4)
@@ -43,7 +44,9 @@ def main():
 
   print("Size of Array: ", arraySize)
   print("Number of Samples in Array: ", samplesNum)
-  print("Received Data: ", data)
+  print("Received Data: \n")
+  for i, val in enumerate(data):
+    print(f"{i:03}: {val:02b}")
 
 
 if __name__ == '__main__':
