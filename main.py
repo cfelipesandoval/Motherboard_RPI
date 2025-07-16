@@ -1,5 +1,6 @@
 import serial
 import RPi.GPIO as GPIO
+import numpy as np
 import time
 import struct
 
@@ -49,10 +50,6 @@ def main():
     print(f"{i:03}: {val:02b}")
 
 
-
-import struct
-import numpy as np
-
 def write_variable_to_file(filename, varname, data, dtype_code):
   """
   Append a variable to a binary file with structured metadata.
@@ -83,7 +80,7 @@ def write_variable_to_file(filename, varname, data, dtype_code):
   data = np.array(data, dtype=np_dtype)
   data_length = len(data)
 
-  with open(filename, 'ab') as f:  # Append mode (creates if needed)
+  with open(filename, 'ab') as f:
     f.write(struct.pack('<i', dtype_code))          # 1. Type code
     f.write(struct.pack('<i', data_length))         # 2. Data length
     f.write(struct.pack('<i', 1))                   # 3. Columns = 1
@@ -92,52 +89,48 @@ def write_variable_to_file(filename, varname, data, dtype_code):
     f.write(varname.encode('ascii') + b'\x00')      # 6. Name + null terminator
     f.write(data.tobytes())                         # 7. Raw binary data
 
-import struct
-import numpy as np
-
 def read_variables_from_file(filename):
-    """
-    Reads all variables from a binary file written with write_variable_to_file().
-    
-    Returns:
-    A list of tuples: (varname, numpy_array)
-    """
-    variables = []
+  """
+  Reads all variables from a binary file written with write_variable_to_file().
+  
+  Returns:
+  A list of tuples: (varname, numpy_array)
+  """
+  variables = []
 
-    with open(filename, 'rb') as f:
-        while True:
-            header = f.read(4 * 5)  # Read 5 int32s (20 bytes)
-            if len(header) < 20:
-                break  # EOF reached
+  with open(filename, 'rb') as f:
+    while True:
+      header = f.read(4 * 5)  # Read 5 int32s (20 bytes)
+      if len(header) < 20:
+        break  # EOF reached
 
-            dtype_code, length, ncols, is_complex, name_len = struct.unpack('<5i', header)
-            name_bytes = f.read(name_len + 1)  # +1 for null terminator
-            varname = name_bytes[:-1].decode('ascii')
+      dtype_code, length, ncols, is_complex, name_len = struct.unpack('<5i', header)
+      name_bytes = f.read(name_len + 1)  # +1 for null terminator
+      varname = name_bytes[:-1].decode('ascii')
 
-            # Determine numpy dtype
-            if dtype_code == 0:
-                np_dtype = np.float64
-                itemsize = 8
-            elif dtype_code == 10:
-                np_dtype = np.float32
-                itemsize = 4
-            elif dtype_code == 30:
-                np_dtype = np.int16
-                itemsize = 2
-            elif dtype_code == 50:
-                np_dtype = np.uint8
-                itemsize = 1
-            else:
-                raise ValueError(f"Unsupported dtype code {dtype_code} for variable '{varname}'")
+      # Determine numpy dtype
+      if dtype_code == 0:
+        np_dtype = np.float64
+        itemsize = 8
+      elif dtype_code == 10:
+        np_dtype = np.float32
+        itemsize = 4
+      elif dtype_code == 30:
+        np_dtype = np.int16
+        itemsize = 2
+      elif dtype_code == 50:
+        np_dtype = np.uint8
+        itemsize = 1
+      else:
+        raise ValueError(f"Unsupported dtype code {dtype_code} for variable '{varname}'")
 
-            # Read data
-            data_bytes = f.read(length * itemsize)
-            data = np.frombuffer(data_bytes, dtype=np_dtype)
+      # Read data
+      data_bytes = f.read(length * itemsize)
+      data = np.frombuffer(data_bytes, dtype=np_dtype)
 
-            variables.append((varname, data))
+      variables.append((varname, data))
 
-    return variables
-
+  return variables
 
 
 if __name__ == '__main__':
