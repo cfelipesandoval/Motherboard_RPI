@@ -42,24 +42,46 @@ class ESP32Protocol:
     self.serial.close()
 
 
-# Example usage
-if __name__ == "__main__":
+def main():
   esp = ESP32Protocol("/dev/ttyACM0")  # Use your actual USB port here
 
   try:
-    esp.send_command("L", "1")
-    print("Sent command to turn on LED")
-
-    esp.send_command("S")
-    print("Requested sensor data")
-
-    print("Waiting for response...")
-    for _ in range(5):
-      response = esp.read_message()
-      if response:
-        print(f"Received: Command={response['command']}, Data={response['data']}")
-        break
-      time.sleep(0.5)
+    print("Send command to Reset ADC")
+    esp.send_command("R")
+    
+    response = esp.read_message()
+    if response:
+      print(f"Received: Command={response['command']}")
+      
+    print("Send command to set NCO Freq to 38 MHz")
+    esp.send_command("N", "38")
+    
+    response = esp.read_message()
+    if response:
+      print(f"Received: Command={response['command']}")
+      
+    print("Send command to set Bandwidth to 2 MHz")
+    esp.send_command("B", "2")
+    
+    response = esp.read_message()
+    if response:
+      print(f"Received: Command={response['command']}")
 
   finally:
     esp.close()
+
+# Example usage
+if __name__ == "__main__":
+  main()
+    
+
+'''
+Commands:
+  "N": Set NCO Frequency
+  "B": Set Bandwidth
+  "D": Set Decimation
+  "G": Set ADC Gain
+  "C": Set Clock Frequency
+  "C": Set Sampling Clock Frequency
+  "R": Reset
+'''

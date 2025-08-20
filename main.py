@@ -49,7 +49,6 @@ def main():
   for i, val in enumerate(data):
     print(f"{i:03}: {val:02b}")
 
-
 def write_variable_to_file(filename, varname, data, dtype_code):
   """
   Append a variable to a binary file with structured metadata.
