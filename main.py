@@ -10,11 +10,11 @@ from serialMessenger import *
 import os
 import re
 
-# DIRECTORY = "E:/HF_Data"
-DIRECTORY = "HF_Data"
+DIRECTORY = "/media/georgiatech.lf/T7 Shield/HF_Data"
+# DIRECTORY = "HF_Data"
 
-COLLECT_PORT = "COM4"   # e.g., "COM5" on Windows
-SETTINGS_PORT = "COM12"
+COLLECT_PORT = "/dev/ttyACM0"   # e.g., "COM5" on Windows
+SETTINGS_PORT = "/dev/ttyACM1"
 BAUD = 4000000
 # FS   = 1e6       # sample rate (Hz) of real input
 PACKET_N = 8192
@@ -75,7 +75,7 @@ def main():
 
 
 def getSpectrogram(fileName, folder, upper = 0, lower = -120):
-  outFolder = "output" + "/" + folder
+  outFolder = DIRECTORY + "/" + folder
   filePath = os.path.join(outFolder, fileName)
   
   data = np.fromfile(filePath, dtype = np.uint32) # you can use this to send
@@ -218,8 +218,8 @@ def collectDayData(ser, sm, intervalMinutes, maxMinutes, collectTime, freqs, col
         sm.send("F", freqs[i])
         saveData(ser, fileName, collectTime, "T" + t)
     
-    if((int(t[-4:-2]) - int(initialTime[-4:-2])) >= maxMinutes):
-      return  
+    # if((int(t[-4:-2]) - int(initialTime[-4:-2])) >= maxMinutes):
+    #   return  
 
 if __name__ == '__main__':
   # main()
@@ -259,7 +259,7 @@ if __name__ == '__main__':
   # t = 183736
   
   # Collect day data
-  freqs = [30,38.5,40,45,50]
+  freqs = [30, 35, 38.2, 40, 45, 50]
   
   collectDayData(ser, sm, 1, 120, 0.1, freqs)
   
