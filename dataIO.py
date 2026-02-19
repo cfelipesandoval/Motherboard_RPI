@@ -9,25 +9,25 @@ import re
 from datetime import datetime, timedelta
 import subprocess
 import sys
-# from scipy.signal import hilbert
 
 # DIRECTORY = "/media/georgiatech.lf/T7 Shield/HF_Data" # For Raspi
 
-# COLLECT_PORT = "/dev/ttyACM0"   # e.g., "COM5" on Windows
-# SETTINGS_PORT = "/dev/ttyACM1"
 
 
 # DIRECTORY = "E:/HF_Data" # for Windows
 
-DIRECTORY = os.getcwd() + "/output"
+DIRECTORY = os.getcwd() + "/output" # Save in current directory
 
-COLLECT_PORT = "COM4"   # e.g., "COM5" on Windows
+
+# USB Ports for Linux
+# SETTINGS_PORT = "/dev/ttyACM1"
+# COLLECT_PORT0 = "/dev/ttyACM0"   # e.g., "COM5" on Windows
+# COLLECT_PORT1 = "/dev/ttyACM2"   # e.g., "COM5" on Windows
+
+# USB Ports for Windows
 SETTINGS_PORT = "COM12"
-
-BAUD = 4000000
-# FS   = 1e6       # sample rate (Hz) of real input
-PACKET_N = 8192
-BYTES_PER_PACKET = 4
+COLLECT_PORT0 = "COM21"
+COLLECT_PORT1 = "COM2"
 
 PLOT_TIME = False
 PLOT_FREQ = True
