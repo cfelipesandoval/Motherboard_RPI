@@ -249,13 +249,13 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
   # plt.plot((data1 & 1))
   # plt.show()
   
-  k = 500000
+  k = 50000
   
   print(f"Data before: {len(data0)}")
   ind = (data0 & 1) == 1
   idx = np.argmax(ind) if np.any(ind) else None
   start = max(0, idx - k)
-  ind[start:idx] = True
+  # ind[start:idx] = True
   
   data0 = data0[ind]
   # data0 = data0 & ~(1)
@@ -265,7 +265,7 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
   ind = (data1 & 1) == 1
   idx = np.argmax(ind) if np.any(ind) else None
   start = max(0, idx - k)
-  ind[start:idx] = True
+  # ind[start:idx] = True
   data1 = data1[ind]
   ind = (data0 & 1) == 1
   # data1 = data1 & ~(1)
@@ -313,21 +313,21 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
   # i.e. the amplitude difference between both channels
   
   scale = max(abs(samples1)) / max(abs(samples0))
-  # samples0 = samples0 * scale
-  # samples1 = samples1 
+  samples0 = samples0 * scale
+  samples1 = samples1 
   
   # ind = int(np.floor(0.2 * 2 * clockFreq / decimation * 1e6))
   calibration0 = max(abs(samples0))
   calibration1 = max(abs(samples1))
-  samples0 = samples0 / calibration0 * 250/2
-  samples1 = samples1 / calibration1 * 250/2
-
+  samples0 = samples0 / calibration0 * 250/2000
+  samples1 = samples1 / calibration1 * 250/2000
+  
   print(calibration0, calibration1)
   # samples0 = samples0[]
   # samples1 = samples1[]
 
-  samples0 = samples0[ind]
-  samples1 = samples1[ind]
+  # samples0 = samples0[ind]
+  # samples1 = samples1[ind]
 
   PLOT_PHASE = False
   plot_phase = False
