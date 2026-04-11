@@ -10,24 +10,27 @@ from datetime import datetime, timedelta
 import subprocess
 import sys
 
-# DIRECTORY = "/media/georgiatech.lf/T7 Shield/HF_Data" # For Raspi
+
+LINUX = True
 
 
+if LINUX:
+  DIRECTORY = "/media/georgiatech.lf/T7 Shield/HF_Data" # For Raspi
+else:
+  DIRECTORY = os.getcwd() + "/output" # Save in current directory
 
 # DIRECTORY = "E:/HF_Data" # for Windows
 
-DIRECTORY = os.getcwd() + "/output" # Save in current directory
-
-
-# USB Ports for Linux
-# SETTINGS_PORT = "/dev/ttyACM1"
-# COLLECT_PORT0 = "/dev/ttyACM0"   # e.g., "COM5" on Windows
-# COLLECT_PORT1 = "/dev/ttyACM2"   # e.g., "COM5" on Windows
-
-# USB Ports for Windows
-SETTINGS_PORT = "COM12"
-COLLECT_PORT0 = "COM21"
-COLLECT_PORT1 = "COM2"
+if LINUX:
+  # USB Ports for Linux
+  SETTINGS_PORT = "/dev/ttyACM1"
+  COLLECT_PORT0 = "/dev/ttyACM0"   # e.g., "COM5" on Windows
+  COLLECT_PORT1 = "/dev/ttyACM2"   # e.g., "COM5" on Windows
+else:
+  # USB Ports for Windows
+  SETTINGS_PORT = "COM12"
+  COLLECT_PORT0 = "COM21"
+  COLLECT_PORT1 = "COM2"
 
 PLOT_TIME = False
 PLOT_FREQ = True
