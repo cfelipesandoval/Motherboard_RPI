@@ -4,7 +4,12 @@ import os
 import numpy as np
 import sys
 
-DIRECTORY = os.getcwd() + "/output"
+LINUX = True
+
+if LINUX:
+  DIRECTORY = "/media/georgiatech.lf/T7 Shield/HF_Data" # For Raspi
+else:
+  DIRECTORY = os.getcwd() + "/output" # Save in current directory
 
 def main():
   num = (sys.argv[1]) 

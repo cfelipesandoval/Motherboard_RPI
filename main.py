@@ -33,9 +33,10 @@ def main():
   freqs = [38.2, 35.2, 32.2, 29.2]
   # freqs = [38.2]
   
-  collectDayDataDual(sm, COLLECT_PORT0, COLLECT_PORT1, 5, 1000, 1, freqs, collectSecond=3)
+  minuteInterval = 5
+  # collectDayDataDual(sm, COLLECT_PORT0, COLLECT_PORT1, minuteInterval, 1000, 1, freqs, collectSecond=1)
   
-  t = "D20260411T043158"
+  t = "D20260411T051258"
   
   outFiles = [t + "F" + str(i) + "C" + str(collectTime) for i in freqs]
   
@@ -43,7 +44,7 @@ def main():
   
   for fileName in outFiles:
     # readDataDual(fileName, lower = -150, upper = -120, clockFreq=clockFreq, decimation=decimation, PLOT_FREQ = True)
-    readDataDualFFT(fileName, clockFreq=clockFreq, decimation=decimation, PLOT_FREQ = True, PLOT_TIME=False, APPLY_WINDOW=False)
+    readDataDualFFT(fileName, clockFreq=clockFreq, decimation=decimation, PLOT_FREQ = True, PLOT_TIME=True, APPLY_WINDOW=False)
     plt.show()
   
   

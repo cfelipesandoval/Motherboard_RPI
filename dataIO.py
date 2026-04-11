@@ -23,8 +23,8 @@ else:
 
 if LINUX:
   # USB Ports for Linux
-  SETTINGS_PORT = "/dev/ttyACM1"
-  COLLECT_PORT0 = "/dev/ttyACM0"   # e.g., "COM5" on Windows
+  SETTINGS_PORT = "/dev/ttyACM0"
+  COLLECT_PORT0 = "/dev/ttyACM1"   # e.g., "COM5" on Windows
   COLLECT_PORT1 = "/dev/ttyACM2"   # e.g., "COM5" on Windows
 else:
   # USB Ports for Windows
@@ -420,7 +420,11 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
 def readDataDualFFT( fileName, lower_db = -120, upper_db = 0, clockFreq = 95, decimation = 16, PLOT_TIME = True, PLOT_FREQ = True, PLOT_DIFFERENCE = False, APPLY_WINDOW = True, REMOVE_DC = True):
   fileName = fileName + ".bin"
   folder = re.search(r"D\d{8}T\d{6}", fileName).group()
-  outFolder = os.path.join("output", folder)
+
+  outFolder = DIRECTORY + "/" + folder
+  
+  filePath = os.path.join(outFolder, fileName)
+  # outFolder = os.path.join("output", folder)
 
   filePath0 = os.path.join(outFolder, "N0" + fileName)
   filePath1 = os.path.join(outFolder, "N1" + fileName)
