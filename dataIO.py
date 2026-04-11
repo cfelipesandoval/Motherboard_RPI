@@ -46,7 +46,7 @@ def saveDataDual(sm: SerialMessenger, ser1: str, ser2: str, fileName, collectTim
   while((line2 != "1")):
     line2 = p2.stdout.readline().strip()
 
-  sm.send("M", -1, timeout = 2)
+  # sm.send("M", -1, timeout = 2)
 
   p1.stdin.write("1\n"); 
   p1.stdin.flush()
@@ -102,23 +102,29 @@ def collectDayDataDual(sm: SerialMessenger, ser1, ser2, intervalMinutes, maxMinu
       
       temp, t = sm.send("T", -1)
       
-      for i in range(len(freqs)):
-        fileName = t + "F" + str(freqs[i]) + "C" + str(collectTime)
-        sm.send_only("F", freqs[i])
+      
+      # fileName = t + "F" + str(freqs) + "C" + str(collectTime)
+      # saveDataDual(sm, ser1, ser2, fileName, collectTime, t)
+      
+      # outFiles.append(fileName)
+      
+      for f in freqs:
+        fileName = t + "F" + str(f) + "C" + str(collectTime)
+        sm.send("F", f, printResult=True)
         time.sleep(0.1)
         saveDataDual(sm, ser1, ser2, fileName, collectTime, t)
         outFiles.append(fileName)
 
-      
-      t0 = datetime.strptime(
-      re.search(r"D(\d{8}T\d{6})", initialTime).group(1), "%Y%m%dT%H%M%S")
+      ## gotta fix this
+      # t0 = datetime.strptime(
+      # re.search(r"D(\d{8}T\d{6})", initialTime).group(1), "%Y%m%dT%H%M%S")
 
-      # Extract and parse current
-      t1 = datetime.strptime(
-          re.search(r"D(\d{8}T\d{6})", t).group(1), "%Y%m%dT%H%M%S")
+      # # Extract and parse current
+      # t1 = datetime.strptime(
+      #     re.search(r"D(\d{8}T\d{6})", t).group(1), "%Y%m%dT%H%M%S")
 
-      if (t1 - t0) >= max_delta:
-        return outFiles
+      # if (t1 - t0) >= max_delta:
+      #   return outFiles
 
 
 def saveData(ser: serial.Serial, sm: SerialMessenger, fileName, collectTime, folder: str = ""):
@@ -251,25 +257,26 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
   
   k = 50000
   
-  print(f"Data before: {len(data0)}")
-  ind = (data0 & 1) == 1
-  idx = np.argmax(ind) if np.any(ind) else None
-  start = max(0, idx - k)
+  # print(f"Data before: {len(data0)}")
+  # ind = (data0 & 1) == 1
+  # idx = np.argmax(ind) if np.any(ind) else None
+  # start = max(0, idx - k)
   # ind[start:idx] = True
   
-  data0 = data0[ind]
-  # data0 = data0 & ~(1)
+  # data0 = data0[ind]
+  data0 = data0 & ~(1)
   print(f"Data after: {len(data0)}")
   
   print(f"Data before: {len(data1)}")
-  ind = (data1 & 1) == 1
-  idx = np.argmax(ind) if np.any(ind) else None
-  start = max(0, idx - k)
-  # ind[start:idx] = True
-  data1 = data1[ind]
-  ind = (data0 & 1) == 1
-  # data1 = data1 & ~(1)
-  print(f"Data after: {len(data1)}")
+  
+  # ind = (data1 & 1) == 1
+  # idx = np.argmax(ind) if np.any(ind) else None
+  # start = max(0, idx - k)
+  # # ind[start:idx] = True
+  # data1 = data1[ind]
+  # ind = (data0 & 1) == 1
+  data1 = data1 & ~(1)
+  # print(f"Data after: {len(data1)}")
   
   # data0 = (data0 >> 16).astype(np.int16).astype(np.float16) / 32768
   # data1 = (data1 >> 16).astype(np.int16).astype(np.float16) / 32768
@@ -312,17 +319,17 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
   # This need to be fixed a different way
   # i.e. the amplitude difference between both channels
   
-  scale = max(abs(samples1)) / max(abs(samples0))
-  samples0 = samples0 * scale
-  samples1 = samples1 
+  # scale = max(abs(samples1)) / max(abs(samples0))
+  # samples0 = samples0 * scale
+  # samples1 = samples1 
   
-  # ind = int(np.floor(0.2 * 2 * clockFreq / decimation * 1e6))
-  calibration0 = max(abs(samples0))
-  calibration1 = max(abs(samples1))
-  samples0 = samples0 / calibration0 * 250/2000
-  samples1 = samples1 / calibration1 * 250/2000
+  # # ind = int(np.floor(0.2 * 2 * clockFreq / decimation * 1e6))
+  # calibration0 = max(abs(samples0))
+  # calibration1 = max(abs(samples1))
+  # samples0 = samples0 / calibration0 * 250/2000
+  # samples1 = samples1 / calibration1 * 250/2000
   
-  print(calibration0, calibration1)
+  # print(calibration0, calibration1)
   # samples0 = samples0[]
   # samples1 = samples1[]
 
@@ -405,6 +412,148 @@ def readDataDual(fileName, lower = -100, upper = -30, clockFreq = 95, decimation
       
       # plt.colorbar(label="Intensity (dB)")
   plt.show()
+
+
+def readDataDualFFT( fileName, lower_db = -120, upper_db = 0, clockFreq = 95, decimation = 16, PLOT_TIME = True, PLOT_FREQ = True, PLOT_DIFFERENCE = False, APPLY_WINDOW = True, REMOVE_DC = True):
+  fileName = fileName + ".bin"
+  folder = re.search(r"D\d{8}T\d{6}", fileName).group()
+  outFolder = os.path.join("output", folder)
+
+  filePath0 = os.path.join(outFolder, "N0" + fileName)
+  filePath1 = os.path.join(outFolder, "N1" + fileName)
+
+  data0 = np.fromfile(filePath0, dtype=np.int16)
+  data1 = np.fromfile(filePath1, dtype=np.int16)
+
+  print(f"Data after ch0: {len(data0)}")
+  print(f"Data after ch1: {len(data1)}")
+
+  data0 = data0.astype(np.float32) / 32768.0
+  data1 = data1.astype(np.float32) / 32768.0
+
+  data0 = data0[:15000000]
+  data1 = data1[:15000000]
+  
+  
+  print(len(data0), len(data1))
+
+  baseName = fileName.replace(".bin", "")
+  pattern = r"D(?P<date>\d{8})T(?P<time>[^FC]+)F(?P<freq>[^C]+)C(?P<collect>.+)"
+  match = re.match(pattern, baseName)
+
+  if not match:
+    raise ValueError("Filename format not recognized")
+
+  freq_val = match.group("freq")
+  collect_val = match.group("collect")
+
+  clockFrequency = clockFreq * 1e6
+  centerFrequency = float(freq_val) * 1e6
+
+  samples0 = data0
+  samples1 = data1
+
+  val = min(len(samples0), len(samples1))
+  samples0 = samples0[:val]
+  samples1 = samples1[:val]
+
+  # fs = 2 * clockFrequency / decimation
+  fs = clockFrequency
+  collectTime = len(samples0) / (2 * clockFrequency / decimation)
+  print(f"Collect time: {collectTime}")
+
+  # Match original amplitude balancing logic
+  # max0 = np.max(np.abs(samples0))
+  # max1 = np.max(np.abs(samples1))
+  # if max0 > 0 and max1 > 0:
+  #   scale = max1 / max0
+  #   samples0 = samples0 * scale
+
+  # calibration0 = np.max(np.abs(samples0))
+  # calibration1 = np.max(np.abs(samples1))
+
+  # if calibration0 > 0:
+  #   samples0 = samples0 / calibration0 * 250 / 2000
+  # if calibration1 > 0:
+  #   samples1 = samples1 / calibration1 * 250 / 2000
+
+  # print(f"Calibration0: {calibration0}, Calibration1: {calibration1}")
+  print("Done")
+
+  skip = 1000
+
+  if PLOT_TIME:
+    plt.figure(figsize=(10, 5))
+    plt.plot(samples0[::skip], label="X-Arm")
+    plt.plot(samples1[::skip], label="Y-Arm")
+
+    if PLOT_DIFFERENCE:
+      plt.plot(samples0[::skip] - samples1[::skip], label="X - Y")
+
+    plt.legend()
+    plt.title(
+      f"Both Channels Superimposed"
+      f" with Fc = {freq_val} MHz and Bandwidth = {clockFreq / decimation} MHz"
+    )
+    plt.xlabel("Sample index")
+    plt.ylabel("Value")
+
+  if PLOT_FREQ:
+    channels = [("X", samples0), ("Y", samples1)]
+
+    for ch_name, data in channels:
+      x = data.copy()
+
+      # if REMOVE_DC:
+      #   x = x - np.mean(x)
+
+      N = len(x)
+
+      if APPLY_WINDOW:
+        window = np.hanning(N)
+        x_fft_in = x * window
+        coherent_gain = np.mean(window)
+      else:
+        x_fft_in = x
+        coherent_gain = 1.0
+
+      N = round(N / 8192)
+      
+      fft_vals = np.fft.rfft(x_fft_in, n = N)
+      freqs = np.fft.rfftfreq(N, d=decimation/(2*fs))
+      # freqs /= decimation / 2
+      # freqs += centerFrequency - clockFrequency / (decimation * 2)
+      
+      freqs_rf = freqs+centerFrequency-clockFrequency/(2*decimation)
+
+      # Shift to actual RF axis like your original spectrogram logic
+      # freqs_rf = freqs + centerFrequency
+
+
+      # Normalize magnitude
+      mag = np.abs(fft_vals) / (N * coherent_gain)
+
+      # Avoid log of zero
+      mag_db = 20 * np.log10(np.maximum(mag, 1e-15))
+
+      fig, ax = plt.subplots(figsize=(10, 6))
+      ax.plot(freqs_rf, mag_db)
+      # ax.plot(freqs_rf, mag)
+
+      ax.set_title(
+        f"Channel {ch_name} FFT"
+        f" with Fc = {freq_val} MHz and Bandwidth = {clockFreq / decimation} MHz"
+      )
+      ax.set_xlabel("Frequency (MHz)")
+      ax.set_ylabel("Magnitude (dB)")
+      # ax.set_ylim(lower_db, upper_db)
+
+      formatter = ticker.FuncFormatter(hz_to_mhz_formatter)
+      ax.xaxis.set_major_formatter(formatter)
+      ax.grid(True)
+  # plt.show()
+
+
 
 def readData(fileName, folder, clockFreq = 95, dec = 16, upper = 0, lower = -120):
   outFolder = folder

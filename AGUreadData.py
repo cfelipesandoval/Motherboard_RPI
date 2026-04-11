@@ -91,9 +91,7 @@ def main():
 
   
   ax.clear()
-  # # # im = ax.imshow(10*np.log10(specArray), origin='lower', aspect='auto',
-  # # #             extent=[0, samples, min(freqsArray[0]), max(freqsArray[0])],
-  # # #             vmin = lower, vmax = upper)
+  # im = ax.imshow(10*np.log10(specArray), origin='lower', aspect='auto', extent=[0, samples, min(freqsArray[0]), max(freqsArray[0])], vmin = lower, vmax = upper)
   
   
   ax.pcolormesh(binsArray, freqs, 10*np.log10(specArray), shading = 'auto', vmin=lower, vmax=upper)
